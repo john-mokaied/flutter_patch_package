@@ -1,58 +1,99 @@
-# Flutter Patch Package
+# flutter_patch_package
 
-Enhance your Flutter projects with `flutter_patch_package`, the ultimate tool for instantaneously applying and managing patches to your Flutter packages. Live on the edge with minimal hassle!
+Dart tool for patching Flutter packages, enabling quick fixes, modifications, and version control integration for a smoother development workflow.
 
-## Features
+##  Features
+* `Instant Patches:` Instantly apply fixes to Flutter packages.
 
-- **Instant Patches**: Instantly apply fixes to Flutter packages.
-- **Version Alerts**: Receive notifications about version mismatches.
-- **Error Logging**: Automatic logging for failed patch attempts ensures you're always informed.
+* `Version Alerts:` Receive notifications about version mismatches.
 
-## Quick Start
+* `Error Logging:` Automatic logging for failed patch attempts ensures you're always informed.
 
-Integrate `flutter_patch_package` into your project by following these simple steps.
 
-### Installation
-
-Add `flutter_patch_package` to your `pubspec.yaml`:
+## Installation
+  To use this plugin, add `flutter_patch_package` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/). For example:
 
 ```yaml
 dependencies:
-  flutter_patch_package: ^1.0.0
+flutter_patch_package: '^0.0.9'
+```
 
-Then, run the following command:
-`flutter pub get`
 
-## Usage
+### Usage
 
-To seamlessly integrate and manage patches with `flutter_patch_package`, follow these steps:
 
-1. **Start Patching**: Before making changes to a package, save its original state. Navigate to the package directory in `.pub-cache` and execute:
-`flutter patch <package_name> start`
+* `Clean git working directory:`
+
+    To ensure a clean start before using flutter_patch_package, check your Git status with:
+
+```yaml
+git status
+```
+
+You should see a message similar to this: `nothing to commit, working tree clean`
+
+
+
+* `Start Patching:`
+
+    Navigate to you project directory and execute:
+
+```yaml
+flutter patch <package_name> start
+```
+
 This command prepares the package for patching by saving a snapshot of its current state for later comparison.
 
-2. **Apply Your Changes**: Modify the package directly in `.pub-cache` to fix issues or add new functionality. These changes can be made with any code editor.
 
-3. **Finalize Patch**: After your modifications are complete, finalize the patch. This process compares the modified package to the original snapshot, generating a patch file that encapsulates your changes. Execute:
-`flutter patch <package_name> done`
+* `Apply Your Changes:`
 
-The generated patch file is stored in the `patches/` directory within your project. This file should be committed to your version control system to share the fix with your team or maintain it across environment setups.
-
-### Applying Patches Automatically
-
-Ensure your patches are re-applied automatically after every `flutter pub get` to maintain your modifications across setups. To do this, include a step in your build process or a script that runs:
-
-`flutter pub run flutter_patch_package`
-
-This version correctly groups the shell commands with their descriptive text, providing a clear, step-by-step guide for using your Flutter patch package.
-
-Version Compatibility Warning `flutter_patch_package` smartly warns you about any version mismatches, ensuring smooth package upgrades.
-
-Troubleshooting
-If you encounter errors, refer to the logs/ directory for detailed diagnostics and quick troubleshooting.
+    Modify the package directly in `.pub-cache` to fix issues or add new functionality.
 
 
+* `Finalize Patch:`
+
+    This process compares the modified package to the original snapshot, generating a patch file that encapsulates your changes.
+
+    To do this run:
+
+```yaml
+flutter patch <package_name> done
+```
+
+The generated patch file is stored in the `patches/` directory within your project. 
 
 
+* `Applying Patches Automatically or Manually`
 
-# flutter_patch_package
+    `flutter_patch_package` automatically applies patches after each flutter pub get or dart pub get.
+
+    For manual patch application at any time, use:
+
+```yaml
+flutter pub run flutter_patch_package
+```
+
+
+* `Review Changes`
+
+    Use `git diff` to examine the modifications. This helps you understand what has been changed by the patch application.
+
+
+* `Commit Changes`
+
+    If you're satisfied with the updates, commit them to your version control system. This can be done using:
+
+
+```yaml
+git add .
+git commit -m "Applied patches to <package_name>"
+
+```
+
+
+### Version Compatibility Warning:
+  flutter_patch_package smartly warns you about any version mismatches, ensuring smooth package upgrades.
+
+
+### Troubleshooting
+  If you encounter errors, refer to the logs/ directory for detailed diagnostics and quick troubleshooting.
