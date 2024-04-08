@@ -15,7 +15,7 @@ Dart tool for patching Flutter packages, enabling quick fixes, modifications, an
 
 ```yaml
 dependencies:
-flutter_patch_package: '^0.0.9'
+flutter_patch_package: '^0.0.10'
 ```
 
 
@@ -39,7 +39,7 @@ You should see a message similar to this: `nothing to commit, working tree clean
     Navigate to you project directory and execute:
 
 ```yaml
-flutter patch <package_name> start
+flutter pub run flutter_patch_package start  <package_name>
 ```
 
 This command prepares the package for patching by saving a snapshot of its current state for later comparison.
@@ -57,21 +57,25 @@ This command prepares the package for patching by saving a snapshot of its curre
     To do this run:
 
 ```yaml
-flutter patch <package_name> done
+flutter pub run flutter_patch_package done <package_name>
 ```
 
 The generated patch file is stored in the `patches/` directory within your project. 
 
 
-* `Applying Patches Automatically or Manually`
+* `Applying Patches Manually:`
 
-    `flutter_patch_package` automatically applies patches after each flutter pub get or dart pub get.
+    While `flutter_patch_package` does not automatically apply patches after each `flutter pub get` or `dart pub get`, you can manually trigger the patch application process at any time. 
 
-    For manual patch application at any time, use:
+   After running `flutter pub get` or `flutter pub upgrade`, apply all stored patches by executing:
 
 ```yaml
-flutter pub run flutter_patch_package
+flutter pub run flutter_patch_package apply
 ```
+
+This command applies all patches found in the patches/ directory to the respective packages.
+
+
 
 
 * `Review Changes`

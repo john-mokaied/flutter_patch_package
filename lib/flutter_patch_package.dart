@@ -80,64 +80,63 @@ class FlutterPatcher {
       appLog('Error finalizing patch for $packageName: $e');
     }
   }
+}
 
-  String? findPackagePath(String packageName, LoggerInterface logger) {
-    final pubCacheDir = _getPubCacheDir(logger);
-    if (pubCacheDir == null) {
-      logger.log('Unable to locate the .pub-cache directory.');
-      return null;
-    }
-
-    // Constructing the expected package directory path pattern
-    final packageDirPattern =
-        RegExp(r'^' + RegExp.escape(packageName) + r'-\d');
-
-    try {
-      final entries = Directory(pubCacheDir).listSync();
-      for (var entry in entries) {
-        if (entry is Directory &&
-            packageDirPattern.hasMatch(path.basename(entry.path))) {
-          return entry.path;
-        }
-      }
-    } catch (e) {
-      logger.log('Error searching for $packageName in .pub-cache: $e');
-    }
-
-    logger.log('Package $packageName not found in .pub-cache.');
+String? findPackagePath(String packageName, LoggerInterface logger) {
+  final pubCacheDir = getPubCacheDir(logger);
+  if (pubCacheDir == null) {
+    logger.log('Unable to locate the .pub-cache directory.');
     return null;
   }
 
-  String? _getPubCacheDir(LoggerInterface logger) {
-    // Check if PUB_CACHE environment variable is set
-    var pubCache = Platform.environment['PUB_CACHE'];
-    if (pubCache != null && Directory(pubCache).existsSync()) {
-      return pubCache;
-    }
+  // Constructing the expected package directory path pattern
+  final packageDirPattern = RegExp(r'^' + RegExp.escape(packageName) + r'-\d');
 
-    // Default .pub-cache locations
-    if (Platform.isWindows) {
-      var appData = Platform.environment['APPDATA'];
-      if (appData != null) {
-        var pubCachePath = path.join(appData, 'Pub', 'Cache');
-        if (Directory(pubCachePath).existsSync()) {
-          return pubCachePath;
-        }
-      }
-    } else {
-      // Linux and MacOS
-      var home = Platform.environment['HOME'];
-      if (home != null) {
-        var pubCachePath = path.join(home, '.pub-cache');
-        if (Directory(pubCachePath).existsSync()) {
-          return pubCachePath;
-        }
+  try {
+    final entries = Directory(pubCacheDir).listSync();
+    for (var entry in entries) {
+      if (entry is Directory &&
+          packageDirPattern.hasMatch(path.basename(entry.path))) {
+        return entry.path;
       }
     }
-
-    logger.log('Could not determine the .pub-cache directory location.');
-    return null;
+  } catch (e) {
+    logger.log('Error searching for $packageName in .pub-cache: $e');
   }
+
+  logger.log('Package $packageName not found in .pub-cache.');
+  return null;
+}
+
+String? getPubCacheDir(LoggerInterface logger) {
+  // Check if PUB_CACHE environment variable is set
+  var pubCache = Platform.environment['PUB_CACHE'];
+  if (pubCache != null && Directory(pubCache).existsSync()) {
+    return pubCache;
+  }
+
+  // Default .pub-cache locations
+  if (Platform.isWindows) {
+    var appData = Platform.environment['APPDATA'];
+    if (appData != null) {
+      var pubCachePath = path.join(appData, 'Pub', 'Cache');
+      if (Directory(pubCachePath).existsSync()) {
+        return pubCachePath;
+      }
+    }
+  } else {
+    // Linux and MacOS
+    var home = Platform.environment['HOME'];
+    if (home != null) {
+      var pubCachePath = path.join(home, '.pub-cache');
+      if (Directory(pubCachePath).existsSync()) {
+        return pubCachePath;
+      }
+    }
+  }
+
+  logger.log('Could not determine the .pub-cache directory location.');
+  return null;
 }
 
 Future<void> copyDirectory(
@@ -161,5 +160,46 @@ Future<void> copyDirectory(
   } catch (e) {
     logger.log(
         'Error copying directory ${source.path} to ${destination.path}: $e');
+  }
+}
+
+void applyPatches(LoggerInterface logger) {
+  const patchesDirPath = 'patches';
+  final patchesDir = Directory(patchesDirPath);
+
+  if (!patchesDir.existsSync()) {
+    logger.log('No patches directory found. No patches to apply.');
+    return;
+  }
+
+  final patchFiles =
+      patchesDir.listSync().where((entity) => entity.path.endsWith('.patch'));
+
+  if (patchFiles.isEmpty) {
+    logger.log('No patch files found in the patches directory.');
+    return;
+  }
+
+  for (var patchFileEntity in patchFiles) {
+    final patchFileName = path.basename(patchFileEntity.path);
+    final packageName =
+        patchFileName.substring(0, patchFileName.lastIndexOf('.'));
+    final packagePath = findPackagePath(packageName, logger);
+
+    if (packagePath == null) {
+      logger.log(
+          'Unable to find package path for $packageName. Patch $patchFileName skipped.');
+      continue;
+    }
+
+    logger.log('Applying patch $patchFileName to $packageName...');
+    final result = Process.runSync(
+        'patch', ['-d', packagePath, '-p1', '-i', patchFileEntity.path]);
+
+    if (result.exitCode != 0) {
+      logger.log('Failed to apply patch $patchFileName: ${result.stderr}');
+    } else {
+      logger.log('Successfully applied patch $patchFileName.');
+    }
   }
 }
